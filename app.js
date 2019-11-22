@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 // Rutas
 var user_routes = require('./routes/User');
+var request_routes = require('./routes/Request');
 
 var app = express();
 
@@ -20,5 +21,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', user_routes);
+app.use('/api', request_routes);
 
 module.exports = app;

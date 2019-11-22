@@ -9,8 +9,8 @@ var RequestSchema = Schema({
     amount: Number,
     status: String,
     checked: Boolean,
-    date: { Type: Date, default: Date.now },
-    user: { Type: Schema.ObjectId, ref: 'User' }
+    date: { type: Date, default: Date.now },
+    user: { type: Schema.Types.ObjectId, ref: 'User'},
 })
 
 module.exports = mongoose.model('Request', RequestSchema);
