@@ -3,6 +3,7 @@
 const log = console.log;
 var User = require('../models/User');
 var bcrypt = require('bcrypt-nodejs');
+var jwt = require('../services/jwt');
 const { validationResult } = require('express-validator');
 
 var controller = {
@@ -55,14 +56,125 @@ var controller = {
     },
 
     edit: function(req, res) {
+        const errors = validationResult(req);
 
+        if(!errors.isEmpty()){
+            return res.status(422).json({ errors: errors.array() });
+        }
+
+        var userId = req.user.sub;
+
+        if(req.user.email != req.body.email) {
+            User.findOne( { email: req.body.email }, (err, user) => {
+                if(err) {
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'Error al identificarse.'
+                    });
+                }
+
+                if(user && user.email == req.body.email) {
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'El mail no puede ser modificado.'
+                    });
+                }else{
+                    User.findByIdAndUpdate({ _id: userId}, req.body, { new: true }, (err, updatedUser) => {
+                        if(err) {
+                            return res.status(500).send({
+                                status: 'error',
+                                message: 'Error al actualizar el usuario,'
+                            });
+                        }
+
+                        if(!updatedUser) {
+                            return res.status(500).send({
+                                status: 'error',
+                                message: 'No se ha actualizado el usuario,'
+                            });
+                        }
+
+                        return res.status(200).send({
+                            status: 'success',
+                            updatedUser
+                        });
+                    });
+                }
+            });
+        }
     },
 
     delete: function(req, res) {
+        var userId = req.params.userId;
 
+        if(!userId) {
+            return res.status(404).send({
+                status: 'error',
+                message: 'No existe el id del usuario.'
+            });
+        }
+
+        User.findById(userId).remove((err, deletedUser) => {
+            if(err) {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error al eliminar el usuario.'
+                });
+            }
+
+            return res.status(200).send({
+                status: 'success',
+                message: 'El usuario se ha eliminado correctamente.',
+                deletedFor: req.user.name
+            });
+        })
     },
 
     login: function(req, res) {
+        const errors = validationResult(req);
+
+        if(!errors.isEmpty()){
+            return res.status(422).json({ errors: errors.array() });
+        }
+
+        User.findOne( { email: req.body.email } , (err, user) => {
+            if(err) {
+                return res.status(500).send({
+                    status: 'error',
+                    message: err
+                });
+            }
+
+            if(!user) {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'No existe el usuario'
+                });
+            }
+
+            bcrypt.compare(req.body.password, user.password, (err, check) => {
+                if(err) {
+                    return res.status(403).send({
+                        status: 'error',
+                        message: 'La contraseña no es correcta',
+                        err
+                    });
+                }
+
+                if(check) {
+                    user.password = undefined;
+                    return res.status(200).send({
+                        token: jwt.createToken(user),
+                        user
+                    });
+                }else{
+                    return res.status(403).send({
+                        status: 'error',
+                        message: 'La contrasña es incorrecta'
+                    });
+                }
+            });
+        });
 
     },
 
