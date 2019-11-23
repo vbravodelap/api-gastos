@@ -14,5 +14,8 @@ router.post('/request/store', [
 ], RequestController.store);
 
 router.get('/requests', RequestController.getRequests);
+router.get('/requests/user', authMiddleware.auth, RequestController.getRequestsByUser);
+router.get('/request/:requestId', authMiddleware.auth, RequestController.getRequest);
+router.post('/request/:requestId/check', authMiddleware.auth, RequestController.checkRequest);
 
 module.exports = router;

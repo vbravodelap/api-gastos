@@ -19,8 +19,29 @@ var controller = {
             status: 'Pendiente',
             checked: false,
             user: req.user.sub
-        }).then( user => {
-            return res.json(user);
+
+        }).then( request => {
+
+            User.findById(req.user.sub, (err, user) => {
+                if(err){
+                    return res.json(err);
+                }
+
+                user.requested = request.amount;
+
+                user.save((err, user) => {
+                    if(err) {
+                        return res.json(err)
+                    }
+
+                    return res.status(200).send({
+                        status: 'success',
+                        request,
+                        userUpdate: user
+                    });
+                });
+            });
+            
         }).catch( err => {
             return res.json(err);
         }); 
@@ -38,6 +59,73 @@ var controller = {
                 requests
             });
         })
+    },
+
+    getRequestsByUser: function(req, res) {
+        var userId = req.user.sub;
+
+        Request.find( { user: userId} , (err, requests) => {
+            if(err) {
+                return res.json(err)
+            }
+
+            return res.json(requests);
+        });
+    },
+
+    getRequest: function(req , res) {
+        var requestId = req.params.requestId;
+
+        if(requestId) {
+            Request.findById(requestId, (err, request) => {
+                if(err){
+                    return res.json(err);
+                }
+
+                return res.json(request);
+            });
+        }
+    },
+
+    checkRequest: function(req, res) {
+        var requestId = req.params.requestId;
+
+        if(requestId) {
+            Request.findById(requestId, (err, request) => {
+                if(err){
+                    return res.json(err);
+                }
+
+                request.status = 'Aprobada';
+                request.checked = true;
+
+                request.save((err, request) => {
+                    if(err){
+                        return res.json(err);
+                    }
+
+                    User.findById(req.user.sub, (err, user) => {
+                        if(err){
+                            return res.json(err);
+                        }
+
+                        user.checked = request.amount;
+                        user.requested = user.requested - request.amount;
+                         
+                        user.save((err, user) => {
+                            if(err) {
+                                return res.json(err);
+                            }
+
+                            return res.json({
+                                user,
+                                request
+                            });
+                        })
+                    });
+                });
+            });
+        }
     }
 }
 
