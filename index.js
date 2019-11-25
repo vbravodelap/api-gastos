@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 var app = require('./app');
 const chalk = require('chalk');
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3001;
 
 mongoose.set('useFindAndModify', false);
 mongoose.Promise = global.Promise;

@@ -4,6 +4,8 @@ const log = console.log;
 var User = require('../models/User');
 var bcrypt = require('bcrypt-nodejs');
 var jwt = require('../services/jwt');
+var JWT = require('jwt-simple');
+const SECRET_KEY = 'pJaReaow0RHNjj7NQriypOPxANN58krjQCtuFBjSKtMzNpLxob7vaXKF54Hxzy6Bv314KL7Qt7G0bwIwCHCHedZuq6LEIOcgTVjm';
 const { validationResult } = require('express-validator');
 
 var controller = {
@@ -176,6 +178,23 @@ var controller = {
             });
         });
 
+    },
+
+    getIdentity: function(req, res) {
+        var token = req.headers.authorization;
+
+        if(token) {
+            var user = JWT.decode(token, SECRET_KEY);
+            return res.status(200).send({
+                status: 'success',
+                user
+            });
+        }else{
+            return res.status(404).send({
+                status: 'error',
+                message: 'error al decodificar el token'
+            });
+        }
     },
 
     getUser: function(req, res) {

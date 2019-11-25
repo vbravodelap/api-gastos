@@ -2,6 +2,7 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var morgan = require('morgan');
 
 // Rutas
 var user_routes = require('./routes/User');
@@ -9,6 +10,11 @@ var request_routes = require('./routes/Request');
 
 var app = express();
 
+morgan.token('id', function getId (req) {
+    return req.id
+})
+
+app.use(morgan(':id :method :url :response-time'))
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 

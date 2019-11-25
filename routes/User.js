@@ -29,6 +29,7 @@ router.post('/user/login', [
 ], UserController.login);
 
 router.delete('/user/:userId', authMiddleware.auth, UserController.delete);
+router.get('/user/whoiam', authMiddleware.auth, UserController.getIdentity);
 
 router.get('/users', UserController.getUsers);
 router.get('/user/:userId', UserController.getUser);
