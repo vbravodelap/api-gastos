@@ -34,6 +34,11 @@ router.get('/user/whoiam', authMiddleware.auth, UserController.getIdentity);
 router.get('/users', UserController.getUsers);
 router.get('/user/:userId', UserController.getUser);
 
+router.put('/user/update/:userId', [
+    check('username').not().isEmpty().withMessage('El campo nombre de usuario no puede ir vacio'),
+    check('name').not().isEmpty().withMessage('El campo nombre de usuario no puede ir vacio'),
+    check('email').isEmail().withMessage('Debe poner un correo valido.'),
+    authMiddleware.auth], UserController.updateUserById)
 
 
 module.exports = router;

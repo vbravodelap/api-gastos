@@ -236,6 +236,32 @@ var controller = {
                 users
             });
         });
+    },
+
+    updateUserById: function(req, res) {
+        const userId = req.params.userId;
+
+        const errors = validationResult(req);
+
+        if(!errors.isEmpty()){
+            return res.status(422).json({ errors: errors.array() });
+        }
+
+        User.findByIdAndUpdate({_id: userId}, req.body, { new: true }, (err, userUpdated)  => {
+            if(err) {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error en la petición',
+                    err
+                })
+            }
+
+            return res.status(200).send({
+                status: 'success',
+                message: 'El usuario se actualizo correctamente',
+                userUpdated
+            });
+        });
     }
 }
 
