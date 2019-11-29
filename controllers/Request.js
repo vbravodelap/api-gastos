@@ -111,8 +111,12 @@ var controller = {
                     });
                 }
 
-                user.requested = user.requested - amountToSubstract;
-
+                if(user.requested == 0) {
+                    user.requested = 0;
+                }else{
+                    user.requested = user.requested - amountToSubstract;
+                }
+                
                 user.save((err, userUpdated) => {
                     if(err) {
                         return res.status(500).send({
