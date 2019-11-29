@@ -1,6 +1,6 @@
 'use strict'
 
-const log = console.log;
+var nodemailer = require('nodemailer');
 var User = require('../models/User');
 var bcrypt = require('bcrypt-nodejs');
 var jwt = require('../services/jwt');

@@ -13,6 +13,8 @@ router.post('/request/store', [
     authMiddleware.auth
 ], RequestController.store);
 
+router.delete('/request/:requestId', authMiddleware.auth, RequestController.delete);
+
 router.get('/requests', RequestController.getRequests);
 router.get('/requests/user', authMiddleware.auth, RequestController.getRequestsByUser);
 router.get('/request/:requestId', authMiddleware.auth, RequestController.getRequest);

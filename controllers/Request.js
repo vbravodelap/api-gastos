@@ -27,7 +27,7 @@ var controller = {
                     return res.json(err);
                 }
 
-                user.requested = request.amount;
+                user.requested = user.requested + request.amount;
 
                 user.save((err, user) => {
                     if(err) {
@@ -85,6 +85,62 @@ var controller = {
                 return res.json(request);
             });
         }
+    },
+
+    delete: function(req, res) {
+        var requestId = req.params.requestId;
+
+        Request.findById(requestId, (err, request) => {
+            if(err) {
+                res.status(500).send({
+                    status: 'error',
+                    message: 'Error al realizar la peticion.',
+                    err
+                })
+            }
+
+            const userToUpdate = request.user;
+            const amountToSubstract = request.amount;
+
+            User.findById(userToUpdate, (err, user) => {
+                if(err) {
+                    return res.status(500).send({
+                        status: 'error',
+                        message: 'Error en la petición',
+                        err
+                    });
+                }
+
+                user.requested = user.requested - amountToSubstract;
+
+                user.save((err, userUpdated) => {
+                    if(err) {
+                        return res.status(500).send({
+                            status: 'error',
+                            message: 'Error en la petición',
+                            err
+                        });
+                    }
+
+                    if(userUpdated) {
+                        Request.findOneAndRemove({ _id: requestId }, (err, request) => {
+                            if(err) {
+                                return res.json(err);
+                            }
+                    
+                            return res.status(200).send({
+                                status: 'success',
+                                message: 'La solicitud fue eliminada correctamente',
+                                userUpdated
+                            });
+                        });
+                    }
+                })
+
+
+            });
+
+        });
     },
 
     checkRequest: function(req, res) {
